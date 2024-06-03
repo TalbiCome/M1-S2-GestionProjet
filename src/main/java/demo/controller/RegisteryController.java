@@ -3,6 +3,7 @@ package demo.controller;
 import demo.model.Worker;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.stream.Stream;
 
+@Profile("registery")
 @EnableScheduling
 @RestController
 @RequestMapping("/workers")
@@ -47,7 +49,11 @@ public class RegisteryController {
     public void cleanManifestationMap()
     {
       LocalDateTime now = LocalDateTime.now();
-      manifestationMap.entrySet().removeIf(entry -> entry.getValue().isBefore(now.minusMinutes(1)));
+      for (String hostname : manifestationMap.keySet()) {
+        if(manifestationMap.get(hostname).isBefore(now.minusMinutes(1)))
+          manifestationMap.remove(hostname);
+          workersRepo.deleteById(hostname);
+        }
     }
 
     private void addHostNameToMap(Worker user) {

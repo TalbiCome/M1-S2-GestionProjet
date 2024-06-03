@@ -5,6 +5,7 @@ import demo.model.Worker;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.client.RestClient;
 
+@Profile("worker")
 @Controller
 @EnableScheduling
 public class WorkerController {
@@ -25,23 +27,26 @@ public class WorkerController {
     public void afterStartup(){
       try{
         this.hostname = System.getenv().get("HOSTNAME");
-        if (this.hostname!= null){
-            this.self = new Worker(hostname);
-            RestClient restClient = RestClient.create();
-            restClient.post()
-                    .uri("http://registery:8081/workers")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(this.self).retrieve();
-        }
+        this.self = new Worker(hostname);
+        sendPostRequest("http://registery:8081/workers", this.self);
       }catch (Exception e){
-        try {
-          TimeUnit.MILLISECONDS.sleep(100);
-        } catch (InterruptedException e1) {
-          e1.printStackTrace();
-        }
-        afterStartup();
+        onFailRelaunchStartUpInit();
       }
 
+    }
+
+    private boolean isValidWorker() {
+      return this.hostname != null 
+        && this.hostname != "registery" 
+        && this.hostname != "loadBalancer";
+    }
+
+    private void onFailRelaunchStartUpInit() {
+      try {
+        TimeUnit.MILLISECONDS.sleep(100);
+      } catch (InterruptedException e1) {
+        afterStartup();
+      }
     }
 
     @GetMapping("/hello2")
@@ -52,10 +57,14 @@ public class WorkerController {
     @Scheduled(fixedRate = 6000)
     public void manifestation()
     {
+      sendPostRequest("http://registery:8081/workers", this.self);
+    }
+
+        private void sendPostRequest(String uri, Object obj) {
       RestClient restClient = RestClient.create();
       restClient.post()
-              .uri("http://registery:8081/workers")
+              .uri(uri)
               .contentType(MediaType.APPLICATION_JSON)
-              .body(this.self).retrieve();
+              .body(obj).retrieve();
     }
 }
