@@ -5,15 +5,15 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 
 import java.util.HashMap;
 import java.util.stream.Stream;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
-
+@EnableScheduling
 @RestController
 @RequestMapping("/workers")
 public class RegisteryController {
@@ -48,5 +48,12 @@ public class RegisteryController {
         }
 
         return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    @Scheduled(fixedRate = 12000)
+    public void cleanManifestationMap()
+    {
+      LocalDateTime now = LocalDateTime.now();
+      manifestationMap.entrySet().removeIf(entry -> entry.getValue().isBefore(now.minusMinutes(1)));
     }
 }
