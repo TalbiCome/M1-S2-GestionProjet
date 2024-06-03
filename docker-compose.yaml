@@ -1,8 +1,6 @@
 services:
 
   registery:
-    build:
-      context: .
     image: gestiondeprojet-loginapp
     ports:
       - "8081:8081"
@@ -12,8 +10,6 @@ services:
       HOSTNAME: registery
 
   loadBalancer:
-    build:
-      context: .
     image: gestiondeprojet-loginapp
     networks:
       - lb-net
@@ -21,8 +17,6 @@ services:
       HOSTNAME: loadBalancer
 
   worker1:
-    build:
-      context: .
     image: gestiondeprojet-loginapp
     networks:
       - lb-net
@@ -30,17 +24,13 @@ services:
       HOSTNAME: worker1
 
   worker2:
-    build:
-      context: .
     image: gestiondeprojet-loginapp
     networks:
       - lb-net
     environment:
       HOSTNAME: worker2
+      
   worker3:
-  
-    build:
-      context: .
     image: gestiondeprojet-loginapp
     networks:
       - lb-net
