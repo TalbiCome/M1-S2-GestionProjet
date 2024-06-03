@@ -36,17 +36,10 @@ public class RegisteryController {
     @PostMapping()
     public ResponseEntity<Worker> put(@RequestBody Worker user) {
         
-        if(! workersRepo.existsById(user.getHostname())){
+        if(! workersRepo.existsById(user.getHostname()))
           workersRepo.save(user);
-        }
 
-        if(manifestationMap.get(user.getHostname()) != null)
-        {
-          manifestationMap.replace(user.getHostname(), LocalDateTime.now());
-        } else {
-          manifestationMap.put(user.getHostname(), LocalDateTime.now());
-        }
-
+        addHostNameToMap(user);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
@@ -55,5 +48,14 @@ public class RegisteryController {
     {
       LocalDateTime now = LocalDateTime.now();
       manifestationMap.entrySet().removeIf(entry -> entry.getValue().isBefore(now.minusMinutes(1)));
+    }
+
+    private void addHostNameToMap(Worker user) {
+      if(manifestationMap.get(user.getHostname()) != null)
+      {
+        manifestationMap.replace(user.getHostname(), LocalDateTime.now());
+      } else {
+        manifestationMap.put(user.getHostname(), LocalDateTime.now());
+      }
     }
 }
