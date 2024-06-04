@@ -53,12 +53,14 @@ public class RegisteryController
   }
 
   @Transactional
-  @Scheduled(fixedRate = 5000)
+  @Scheduled(fixedRate = 120000)
   public void cleanManifestationMap()
   {
     LocalDateTime now = LocalDateTime.now();
     List<String> toRemove = new ArrayList<>();
-    for (String hostname : manifestationMap.keySet()) {
+
+    for (String hostname : manifestationMap.keySet())
+    {
       if(manifestationMap.get(hostname).isBefore(now.minusMinutes(1)))
       {
         toRemove.add(hostname);
@@ -66,14 +68,22 @@ public class RegisteryController
       }
     }
 
+    if(!toRemove.isEmpty())
+    {
+      System.out.println("Workers List has been updated, sending the updated list to LoadBalancer.");
+      removeAllInManifestationMap(toRemove);
+      sendUpdatedWorkersListToLoadBalancer();
+    }
+  }
+
+  private void removeAllInManifestationMap(List<String> toRemove) {
     for (String hostname : toRemove) {
       manifestationMap.remove(hostname);
     }
-    sendUpdatedWorkersListToLoadBalancer();
   }
 
-  private void sendUpdatedWorkersListToLoadBalancer() {
-    
+  private void sendUpdatedWorkersListToLoadBalancer() 
+  {
     sendPostRequest("http://loadBalancer:8081/workersList", workersRepo.streamAllBy().toList());
   }
 

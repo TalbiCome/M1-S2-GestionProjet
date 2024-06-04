@@ -50,9 +50,10 @@ public class WorkerController {
       return new ResponseEntity<>(hostname + " says hello!", HttpStatus.OK);
   }
 
-  @Scheduled(fixedRate = 6000)
+  @Scheduled(fixedRate = 60000)
   public void manifestation()
   {
+    System.out.println(hostname + " is still alive!");
     sendPostRequest("http://registery:8081/workers", this.self);
   }
 
