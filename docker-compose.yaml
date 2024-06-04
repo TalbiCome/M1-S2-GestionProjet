@@ -1,9 +1,16 @@
 services:
 
-  registery:
+  service:
     image: gestiondeprojet-loginapp
     ports:
       - "8081:8081"
+    networks:
+      - lb-net
+    environment:
+      HOSTNAME: service
+
+  registery:
+    image: gestiondeprojet-loginapp
     networks:
       - lb-net
     environment:
