@@ -35,12 +35,6 @@ public class RegisteryController
     Stream<Worker> s = workersRepo.streamAllBy();
     return new ResponseEntity<>(s.toList(), HttpStatus.OK);
   }
-
-  @GetMapping("/map")
-  public ResponseEntity<Object> getManifestationMap() 
-  {
-    return new ResponseEntity<>(manifestationMap.toString(), HttpStatus.OK);
-  }
   
   @PostMapping()
   public ResponseEntity<Worker> put(@RequestBody Worker user) 

@@ -24,28 +24,25 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class LoadBalancer {
   private List<Worker> workers;
+  private boolean hasWorkerListBeenInitialized = false;
 
   private int index = 0;
 
-  @GetMapping("/hi")
-  public ResponseEntity<String> hello() throws JsonMappingException, JsonProcessingException 
-  {
-    RestClient restClient = RestClient.create();
-    String r = restClient.get().uri("http://registery:8081/workers")
-            .retrieve().body(String.class);
-    ObjectMapper mapper = new ObjectMapper();
-    this.workers = mapper.readValue(r, new TypeReference<List<Worker>>() {
-    });
+  private String getNextWorkerUri() {
+    //first init is needed because the order of creation of services can't be changed
+    //and worker can be created after the Registery thus not appearing in the list when posted
+    //still need to be sure that all worker are done with their init
+    if(hasWorkerListBeenInitialized == false) 
+    {
+      initialiseWorkerListFromRegistery();
+    }
 
     this.index = (this.index + 1) % this.workers.size();
-    String uri = "http://" + this.workers.get(this.index).getHostname() + ":8081/hello2";
-    String rw = restClient.get().uri(uri).retrieve().body(String.class);
-
-    return new ResponseEntity<>(rw, HttpStatus.OK);
+    String uri = "http://" + this.workers.get(this.index).getHostname();
+    return uri;
   }
 
-  private String getNextWorkerUri() {
-
+  private void initialiseWorkerListFromRegistery() {
     RestClient restClient = RestClient.create();
     String r = restClient.get().uri("http://registery:8081/workers")
             .retrieve().body(String.class);
@@ -60,10 +57,7 @@ public class LoadBalancer {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-
-    this.index = (this.index + 1) % this.workers.size();
-    String uri = "http://" + this.workers.get(this.index).getHostname();
-    return uri;
+    hasWorkerListBeenInitialized = true;
   }
     
 

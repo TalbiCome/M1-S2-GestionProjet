@@ -45,16 +45,10 @@ public class WorkerController {
     }
   }
 
-  @GetMapping("/hello2")
-  public ResponseEntity<String> hello()
-  {
-      return new ResponseEntity<>(hostname + " says hello!", HttpStatus.OK);
-  }
-
   @Scheduled(fixedRate = 60000)
   public void manifestation()
   {
-    System.out.println(hostname + " is still alive!");
+    System.out.println(hostname + " is manifesting to the registery.");
     sendPostRequest("http://registery:8081/workers", this.self);
   }
 
