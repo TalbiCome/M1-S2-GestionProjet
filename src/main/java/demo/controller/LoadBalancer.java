@@ -11,9 +11,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @Profile("loadBalancer")
 @Controller
@@ -38,4 +42,24 @@ public class LoadBalancer {
 
     return new ResponseEntity<>(rw, HttpStatus.OK);
   }
+
+  @GetMapping("/workersList")
+  public ResponseEntity<?> workerListDisplay() {
+    System.out.println("Workers: " + this.workers);
+    return new ResponseEntity<List<Worker>>(this.workers, HttpStatus.OK);
+  }
+
+  @PostMapping("/workersList")
+  public ResponseEntity<?> workerListUpdate(@RequestBody String workerList) {
+    ObjectMapper mapper = new ObjectMapper();
+    System.out.println("Received WorkerList: " + workerList);
+    try {
+      this.workers = mapper.readValue(workerList, new TypeReference<List<Worker>>() {});
+    } catch (Exception e) {
+      System.out.println("Error: " + e);
+    }
+    System.out.println("Workers: " + this.workers);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+  
 }
