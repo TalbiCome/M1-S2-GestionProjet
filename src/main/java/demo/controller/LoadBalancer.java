@@ -14,9 +14,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
+import java.util.Random;
+
 import org.springframework.web.bind.annotation.RequestParam;
 
 
@@ -65,8 +68,18 @@ public class LoadBalancer {
   public ResponseEntity<String> helloRequest(@PathVariable("name") String name) {
     RestClient restClient = RestClient.create();
     String uri = getNextWorkerUri() + ":8081/hello/" + name;
-    String r = restClient.get().uri(uri)
+    String r = "";
+    try{
+      r = restClient.get().uri(uri)
       .retrieve().body(String.class);
+    } catch (ResourceAccessException e) {
+      System.out.println("Error timeout: " + uri);
+      Random rand = new Random();
+      workers.remove(this.index);
+      this.index = rand.nextInt(this.workers.size());
+      helloRequest(name);
+    }
+    
     System.out.println("LoadBalancer is sending to worker: " + uri);
     System.out.println("LoadBalancer: " + name);
     return new ResponseEntity<>(r, HttpStatus.OK);
