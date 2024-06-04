@@ -18,23 +18,24 @@ import java.util.List;
 @Profile("loadBalancer")
 @Controller
 public class LoadBalancer {
-    private List<Worker> workers;
+  private List<Worker> workers;
 
-    private int index = 0;
+  private int index = 0;
 
-    @GetMapping("/hi")
-    public ResponseEntity<String> hello() throws JsonMappingException, JsonProcessingException {
-        RestClient restClient = RestClient.create();
-        String r = restClient.get().uri("http://registery:8081/workers")
-                .retrieve().body(String.class);
-        ObjectMapper mapper = new ObjectMapper();
-        this.workers = mapper.readValue(r, new TypeReference<List<Worker>>() {
-        });
+  @GetMapping("/hi")
+  public ResponseEntity<String> hello() throws JsonMappingException, JsonProcessingException 
+  {
+    RestClient restClient = RestClient.create();
+    String r = restClient.get().uri("http://registery:8081/workers")
+            .retrieve().body(String.class);
+    ObjectMapper mapper = new ObjectMapper();
+    this.workers = mapper.readValue(r, new TypeReference<List<Worker>>() {
+    });
 
-        this.index = (this.index + 1) % this.workers.size();
-        String uri = "http://" + this.workers.get(this.index).getHostname() + ":8081/hello2";
-        String rw = restClient.get().uri(uri).retrieve().body(String.class);
+    this.index = (this.index + 1) % this.workers.size();
+    String uri = "http://" + this.workers.get(this.index).getHostname() + ":8081/hello2";
+    String rw = restClient.get().uri(uri).retrieve().body(String.class);
 
-        return new ResponseEntity<>(rw, HttpStatus.OK);
-    }
+    return new ResponseEntity<>(rw, HttpStatus.OK);
+  }
 }

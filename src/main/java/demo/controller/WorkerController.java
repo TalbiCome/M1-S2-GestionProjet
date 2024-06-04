@@ -20,51 +20,48 @@ import org.springframework.web.client.RestClient;
 @Controller
 @EnableScheduling
 public class WorkerController {
-    private String hostname;
-    private Worker self;
+  private String hostname;
+  private Worker self;
 
-    @EventListener(ApplicationReadyEvent.class)
-    public void afterStartup(){
-      try{
-        this.hostname = System.getenv().get("HOSTNAME");
-        this.self = new Worker(hostname);
-        sendPostRequest("http://registery:8081/workers", this.self);
-      }catch (Exception e){
-        onFailRelaunchStartUpInit();
-      }
-
-    }
-
-    private boolean isValidWorker() {
-      return this.hostname != null 
-        && this.hostname != "registery" 
-        && this.hostname != "loadBalancer";
-    }
-
-    private void onFailRelaunchStartUpInit() {
-      try {
-        TimeUnit.MILLISECONDS.sleep(100);
-      } catch (InterruptedException e1) {
-        afterStartup();
-      }
-    }
-
-    @GetMapping("/hello2")
-    public ResponseEntity<String> hello(){
-        return new ResponseEntity<>(hostname + " says hello!", HttpStatus.OK);
-    }
-
-    @Scheduled(fixedRate = 6000)
-    public void manifestation()
-    {
+  @EventListener(ApplicationReadyEvent.class)
+  public void afterStartup()
+  {
+    try{
+      this.hostname = System.getenv().get("HOSTNAME");
+      this.self = new Worker(hostname);
       sendPostRequest("http://registery:8081/workers", this.self);
+    }catch (Exception e){
+      onFailRelaunchStartUpInit();
     }
+  }
 
-        private void sendPostRequest(String uri, Object obj) {
-      RestClient restClient = RestClient.create();
-      restClient.post()
-              .uri(uri)
-              .contentType(MediaType.APPLICATION_JSON)
-              .body(obj).retrieve();
+  private void onFailRelaunchStartUpInit() 
+  {
+    try {
+      TimeUnit.MILLISECONDS.sleep(100);
+    } catch (InterruptedException e1) {
+      afterStartup();
     }
+  }
+
+  @GetMapping("/hello2")
+  public ResponseEntity<String> hello()
+  {
+      return new ResponseEntity<>(hostname + " says hello!", HttpStatus.OK);
+  }
+
+  @Scheduled(fixedRate = 6000)
+  public void manifestation()
+  {
+    sendPostRequest("http://registery:8081/workers", this.self);
+  }
+
+  private void sendPostRequest(String uri, Object obj) 
+  {
+    RestClient restClient = RestClient.create();
+    restClient.post()
+    .uri(uri)
+    .contentType(MediaType.APPLICATION_JSON)
+    .body(obj).retrieve();
+  }
 }

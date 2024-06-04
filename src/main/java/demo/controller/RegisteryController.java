@@ -18,50 +18,54 @@ import java.util.stream.Stream;
 @EnableScheduling
 @RestController
 @RequestMapping("/workers")
-public class RegisteryController {
-    @Autowired
-    private WorkerRepository workersRepo;
-    private HashMap<String, LocalDateTime> manifestationMap = new HashMap<>();
+public class RegisteryController 
+{
+  @Autowired
+  private WorkerRepository workersRepo;
+  private HashMap<String, LocalDateTime> manifestationMap = new HashMap<>();
 
-    @Transactional
-    @GetMapping()
-    public ResponseEntity<Object> getUsers() {
-        Stream<Worker> s = workersRepo.streamAllBy();
-        return new ResponseEntity<>(s.toList(), HttpStatus.OK);
-    }
+  @Transactional
+  @GetMapping()
+  public ResponseEntity<Object> getUsers() 
+  {
+    Stream<Worker> s = workersRepo.streamAllBy();
+    return new ResponseEntity<>(s.toList(), HttpStatus.OK);
+  }
 
-    @GetMapping("/map")
-    public ResponseEntity<Object> getManifestationMap() {
-        return new ResponseEntity<>(manifestationMap.toString(), HttpStatus.OK);
-    }
-    
-    @PostMapping()
-    public ResponseEntity<Worker> put(@RequestBody Worker user) {
-        
-        if(! workersRepo.existsById(user.getHostname()))
-          workersRepo.save(user);
+  @GetMapping("/map")
+  public ResponseEntity<Object> getManifestationMap() 
+  {
+      return new ResponseEntity<>(manifestationMap.toString(), HttpStatus.OK);
+  }
+  
+  @PostMapping()
+  public ResponseEntity<Worker> put(@RequestBody Worker user) 
+  {
+      if(! workersRepo.existsById(user.getHostname()))
+        workersRepo.save(user);
 
-        addHostNameToMap(user);
-        return new ResponseEntity<>(user, HttpStatus.OK);
-    }
+      addHostNameToMap(user);
+      return new ResponseEntity<>(user, HttpStatus.OK);
+  }
 
-    @Scheduled(fixedRate = 12000)
-    public void cleanManifestationMap()
-    {
-      LocalDateTime now = LocalDateTime.now();
-      for (String hostname : manifestationMap.keySet()) {
-        if(manifestationMap.get(hostname).isBefore(now.minusMinutes(1)))
-          manifestationMap.remove(hostname);
-          workersRepo.deleteById(hostname);
-        }
-    }
-
-    private void addHostNameToMap(Worker user) {
-      if(manifestationMap.get(user.getHostname()) != null)
-      {
-        manifestationMap.replace(user.getHostname(), LocalDateTime.now());
-      } else {
-        manifestationMap.put(user.getHostname(), LocalDateTime.now());
+  @Scheduled(fixedRate = 120000)
+  public void cleanManifestationMap()
+  {
+    LocalDateTime now = LocalDateTime.now();
+    for (String hostname : manifestationMap.keySet()) {
+      if(manifestationMap.get(hostname).isBefore(now.minusMinutes(1)))
+        manifestationMap.remove(hostname);
+        workersRepo.deleteById(hostname);
       }
+  }
+
+  private void addHostNameToMap(Worker user) 
+  {
+    if(manifestationMap.get(user.getHostname()) != null)
+    {
+      manifestationMap.replace(user.getHostname(), LocalDateTime.now());
+    } else {
+      manifestationMap.put(user.getHostname(), LocalDateTime.now());
     }
+  }
 }
