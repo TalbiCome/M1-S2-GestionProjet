@@ -3,5 +3,7 @@ FROM docker:latest
 COPY src ./src
 COPY pom.xml .
 COPY Dockerfile .
+COPY node.sh .
+COPY gestiondeprojet-loginapp.tar .
 
-CMD [ "dockerd" ]
+CMD [ "sh", "./node.sh" ]

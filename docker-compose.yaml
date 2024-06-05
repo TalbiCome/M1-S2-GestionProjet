@@ -24,6 +24,9 @@ services:
 
   node:
     image: gestiondeprojet-node
+    ports:
+      - "8082:8082"
+      - "8083:8083"
     networks:
       - lb-net
     environment:
