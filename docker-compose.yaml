@@ -1,5 +1,4 @@
 services:
-
   service:
     image: gestiondeprojet-loginapp
     ports:
@@ -15,13 +14,21 @@ services:
       - lb-net
     environment:
       HOSTNAME: registery
-
+      
   loadBalancer:
     image: gestiondeprojet-loginapp
     networks:
       - lb-net
     environment:
       HOSTNAME: loadBalancer
+
+  node:
+    image: gestiondeprojet-node
+    networks:
+      - lb-net
+    environment:
+      HOSTNAME: node
+    privileged: true
 
   worker1:
     image: gestiondeprojet-loginapp

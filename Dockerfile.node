@@ -1,0 +1,7 @@
+FROM docker:latest
+
+COPY src ./src
+COPY pom.xml .
+COPY Dockerfile .
+
+CMD [ "dockerd" ]
