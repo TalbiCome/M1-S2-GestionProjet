@@ -6,12 +6,20 @@ import jakarta.persistence.*;
 public class Worker {
     @Id
     private String hostname;
+    private String service;
+    private String port;
 
     public Worker() {
     }
     public Worker(String hostname) {
         this.hostname = hostname;
     }
+
+    public Worker(String hostname, String service, String port) {
+        this.hostname = hostname;
+        this.service = service;
+        this.port = port;
+  }
 
     public String getHostname() {
         return hostname;

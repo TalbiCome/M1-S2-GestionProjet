@@ -23,6 +23,20 @@ services:
     environment:
       HOSTNAME: loadBalancer
 
+  node:
+    image: gestiondeprojet-node:latest
+    privileged: true
+    ports:
+      - "2375:2375"
+      - "8082:8082"
+      - "8083:8083"
+      - "8084:8084"
+    networks:
+      - lb-net
+    environment:
+      HOSTNAME: node
+
+
   worker1:
     image: gestiondeprojet-loginapp
     networks:

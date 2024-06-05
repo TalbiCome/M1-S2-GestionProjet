@@ -1,0 +1,16 @@
+# Start from a base image with Docker installed
+FROM docker:dind
+
+RUN apk update && apk add docker openrc
+
+# Set the working directory
+WORKDIR /app
+
+# Copy your application's code into the Docker image
+COPY pom.xml .
+COPY src ./src
+COPY Dockerfile ./Dockerfile
+COPY nodeScript.sh ./nodeScript.sh
+
+RUN chmod +x ./nodeScript.sh
+CMD ["./nodeScript.sh"]
